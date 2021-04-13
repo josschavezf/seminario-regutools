@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Consultando la base de datos regulonDB con el paquete regutools</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Joselyn Chávez" />
+    <script src="regutools_files/header-attrs-2.7/header-attrs.js"></script>
+    <script src="regutools_files/clipboard-2.0.6/clipboard.min.js"></script>
+    <link href="regutools_files/xaringanExtra-clipboard-0.2.4/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="regutools_files/xaringanExtra-clipboard-0.2.4/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"Copy Code","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
+    <link rel="stylesheet" href="css/cand.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Consultando la base de datos regulonDB con el paquete regutools
+### Joselyn Chávez
+### 13/04/2021
+
+---
+
+
+
+
+
+
+# La base de datos regulonDB
+&lt;br&gt;
+
+- Contiene datos sobre la red de regulación transcripcional de *Escherichia coli* K12.
+- Es una de las bases de datos mejor curadas.
+- Incluye información experimental recopilada durante &gt; 20 años.
+- Se actualiza constantemente.
+
+.center[
+&lt;http://regulondb.ccg.unam.mx&gt;
+]
+
+[
+&lt;img src="img/regulondb.png" width="65%" style="display: block; margin: auto;" /&gt;
+](http://regulondb.ccg.unam.mx)
+
+---
+# Regutools permite el acceso a regulonDB de forma programática
+&lt;br&gt;&lt;br&gt;
+
+&lt;img src="img/regutools.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+class: chapter-slide
+
+# Instalación
+
+---
+
+# Instalando regutools
+.pull-left[ &lt;br&gt;&lt;br&gt;
+.center[&lt;https://bioconductor.org/&gt; ]
+
+&lt;img src="img/bioconductor.png" width="100%" /&gt;
+]
+
+.pull-right[ &lt;br&gt;
+** Código para instalación **
+
+```r
+install.packages("BiocManager")
+
+BiocManager::install("regutools")
+```
+]
+
+--
+.pull-right[
+&lt;br&gt;
+** Documentación **
+
+- Viñeta
+
+
+```r
+browseVignettes("regutools")
+```
+
+- Manual de referencia
+
+&lt;img src="img/documentacion.png" width="100%" /&gt;
+]
+
+---
+# Regutools descarga la base de datos de forma local
+
+### Ventajas: 
+
+- No dependes de la conexión a internet.
+- Se descarga una sola vez por sesión.
+- Si asignas un directorio de descarga, sólo necesitas descargarla una vez.
+
+### Desventajas:
+- Es necesario descargarla nuevamente cuando existen versiones actualizadas de regulonDB.
+
+---
+# Comencemos!
+
+- Cargamos la paquetería:
+
+```r
+library(regutools)
+```
+
+- Conectamos con la base de datos.
+  
+Si la base no se encuentra de forma local, se descarga en una ubicación temporal.
+
+
+```r
+regulondb_conn &lt;- connect_database()
+```
+
+Si le indicamos una ruta de descarga, sólo necesitaremos descargar la base una vez.
+
+
+```r
+regulondb_conn &lt;- 
+  connect_database(bfc = BiocFileCache::BiocFileCache("base"))
+```
+
+---
+# El entorno de regutools requiere un objeto de tipo regulondb
+&lt;br&gt;
+
+.left-column[
+- Este objeto conserva los metadatos a lo largo del análisis.
+- A futuro habrán otros organismos disponibles.
+- Cada función requerirá al objeto regulondb como primer argumento.
+
+]
+
+.right-column[
+
+```r
+e_coli_regulondb &lt;-
+    regulondb(
+        database_conn = regulondb_conn,
+        organism = "E.coli",
+        database_version = "v10.8",
+        genome_version = "1"
+    )
+```
+]
+
+--
+&lt;br&gt;&lt;br&gt;
+.right-column[
+
+```r
+e_coli_regulondb
+```
+
+```
+## regulondb object
+##   organism: E.coli
+##   genome_build: 1
+##   database_version: v10.8
+##   database_conn: /Users/joselynchavez/Documents/seminario-regutools/base/14b645fe9696d_regulondb_v10.8_sqlite.db%3Fdl%3D1
+```
+]
+
+---
+class: chapter-slide
+
+# Exploración de los datos
+
+---
+# Exploremos los datos disponibles en la base de datos
+
+
+```r
+list_datasets(e_coli_regulondb)
+```
+
+```
+## [1] "DNA_OBJECTS"       "GENE"              "NETWORK"           "OPERON"           
+## [5] "PROMOTER"          "REGULONDB_OBJECTS" "TF"                "TU"
+```
+
+--
+# Cada set de datos tiene diferentes columnas o atributos
+
+
+```r
+list_attributes(e_coli_regulondb, "GENE")
+```
+
+```
+##  [1] "id"                        "name"                      "bnumber"                  
+##  [4] "gi"                        "synonyms"                  "posleft"                  
+##  [7] "posright"                  "strand"                    "dna_sequence"             
+## [10] "external_db_link"          "evidence_reference"        "product_id"               
+## [13] "product_name"              "product_synonym"           "product_sequence"         
+## [16] "molecular_weigth"          "isoelectric_point"         "celullar_location"        
+## [19] "product_note"              "product_type"              "go_index_bp"              
+## [22] "go_desc_bp"                "go_index_cc"               "go_desc_cc"               
+## [25] "go_index_mf"               "go_desc_mf"                "product_external_db_links"
+## [28] "product_ev_ref"            "operon_id"                 "operon_name"              
+## [31] "tu_promoter"               "sigma_factor"              "gene_tf"
+```
+
+---
+
+```r
+list_attributes(e_coli_regulondb, "DNA_OBJECTS")
+```
+
+```
+## [1] "id"          "type"        "name"        "posleft"     "posright"    "strand"     
+## [7] "description"
+```
+
+
+```r
+list_attributes(e_coli_regulondb, "PROMOTER")
+```
+
+```
+##  [1] "id"                          "name"                       
+##  [3] "synonyms"                    "sigma_factor"               
+##  [5] "tss"                         "strand"                     
+##  [7] "promoter_features"           "total_ri"                   
+##  [9] "regulated_tu"                "regulated_operon"           
+## [11] "promoter_sequence"           "ri_info"                    
+## [13] "promoter_evidence_reference" "note"
+```
+
+
+```r
+list_attributes(e_coli_regulondb, "TF")
+```
+
+```
+##  [1] "id"                          "name"                       
+##  [3] "synonyms"                    "encode_tf_gene_id"          
+##  [5] "encode_tf_operon_id"         "encode_tf_tu_id"            
+##  [7] "site_length"                 "symmetry"                   
+##  [9] "transcription_factor_family" "connectivity_class"         
+## [11] "sensing_class"               "global_function_all_tfbs"   
+## [13] "global_function_strong"      "note"                       
+## [15] "total_regulated_gene"        "total_effect_repressor_gene"
+## [17] "total_effect_activator_gene" "total_effect_dual_gene"     
+## [19] "total_effect_unknown_gene"   "total_tfbs"                 
+## [21] "total_ri"                    "total_regulated_tf"         
+## [23] "total_regulated_promoter"    "total_regulated_tu"         
+## [25] "total_regulated_operon"      "total_coregulated_sigma"    
+## [27] "total_active_conformation"   "total_coregulator"          
+## [29] "regulated_gene_info"         "regulated_tf_id"            
+## [31] "regulated_tf_name"           "regulated_tu_id"            
+## [33] "regulated_tu_name"           "regulated_operon_id"        
+## [35] "regulated_operon_name"       "regulated_pm_id"            
+## [37] "regulated_pm_name"           "coregulated_sigma"          
+## [39] "active_conformation_id"      "active_conformation_name"   
+## [41] "coregulator_id"              "coregulator_name"           
+## [43] "tfbs_unique"                 "regulation_info"            
+## [45] "evidence_reference"
+```
+
+---
+# Podemos acceder a un set de datos completo
+&lt;br&gt;
+
+```r
+get_dataset(e_coli_regulondb,"GENE")
+get_dataset(e_coli_regulondb,"GENE") %&gt;% View()
+```
+
+El resultado es de clase regulondb_result
+
+
+```r
+get_dataset(e_coli_regulondb,"GENE") %&gt;% class()
+```
+
+```
+## [1] "regulondb_result"
+## attr(,"package")
+## [1] "regutools"
+```
+
+Para extraer, seleccionar y filtrar los datos tenemos dos opciones:
+
+- Convertir el resultado a data.frame o tibble.
+- Usar los argumentos de filtrado de la función.
+
+---
+## Opción 1: Convertir el resultado a data.frame o tibble
+
+
+```r
+resultado &lt;- get_dataset(e_coli_regulondb,"GENE") %&gt;% as_tibble()
+
+resultado[1:5,1:3]
+```
+
+```
+## # A tibble: 5 x 3
+##   id           name  bnumber
+##   &lt;chr&gt;        &lt;chr&gt; &lt;chr&gt;  
+## 1 ECK120000001 alr   b4053  
+## 2 ECK120000002 modB  b0764  
+## 3 ECK120000003 cysZ  b2413  
+## 4 ECK120000004 dfp   b3639  
+## 5 ECK120000005 dcuB  b4123
+```
+
+```r
+colnames(resultado)
+```
+
+```
+##  [1] "id"                        "name"                      "bnumber"                  
+##  [4] "gi"                        "synonyms"                  "posleft"                  
+##  [7] "posright"                  "strand"                    "dna_sequence"             
+## [10] "external_db_link"          "evidence_reference"        "product_id"               
+## [13] "product_name"              "product_synonym"           "product_sequence"         
+## [16] "molecular_weigth"          "isoelectric_point"         "celullar_location"        
+## [19] "product_note"              "product_type"              "go_index_bp"              
+## [22] "go_desc_bp"                "go_index_cc"               "go_desc_cc"               
+## [25] "go_index_mf"               "go_desc_mf"                "product_external_db_links"
+## [28] "product_ev_ref"            "operon_id"                 "operon_name"              
+## [31] "tu_promoter"               "sigma_factor"              "gene_tf"
+```
+
+---
+# A partir de aquí podemos usar cualquier función de tidyverse
+&lt;br&gt;
+&lt;img src="img/dplyr_filter.jpg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle, center
+&lt;img src="img/dplyr_mutate.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle, center
+&lt;img src="img/dplyr_relocate.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+```r
+select(resultado,"id", "name", "strand","sigma_factor")
+```
+
+```
+## # A tibble: 4,602 x 4
+##    id           name  strand  sigma_factor   
+##    &lt;chr&gt;        &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;          
+##  1 ECK120000001 alr   forward &lt;NA&gt;           
+##  2 ECK120000002 modB  forward Sigma28,Sigma70
+##  3 ECK120000003 cysZ  forward &lt;NA&gt;           
+##  4 ECK120000004 dfp   forward &lt;NA&gt;           
+##  5 ECK120000005 dcuB  reverse Sigma70        
+##  6 ECK120000006 hisM  reverse Sigma54,Sigma70
+##  7 ECK120000007 zraS  forward Sigma54        
+##  8 ECK120000008 rhsE  forward &lt;NA&gt;           
+##  9 ECK120000009 yaaA  reverse &lt;NA&gt;           
+## 10 ECK120000010 cydC  reverse Sigma70        
+## # … with 4,592 more rows
+```
+
+&lt;img src="img/presenting_monster.png" width="50%" style="display: block; margin: auto 0 auto auto;" /&gt;
+
+---
+## Opción 2: Usar los argumentos de filtrado de la función
+
+* Selección de columnas
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"))
+```
+
+```
+## regulondb_result with 4602 rows and 4 columns
+##                id        name      strand    sigma_factor
+##       &lt;character&gt; &lt;character&gt; &lt;character&gt;     &lt;character&gt;
+## 1    ECK120000001         alr     forward              NA
+## 2    ECK120000002        modB     forward Sigma28,Sigma70
+## 3    ECK120000003        cysZ     forward              NA
+## 4    ECK120000004         dfp     forward              NA
+## 5    ECK120000005        dcuB     reverse         Sigma70
+## ...           ...         ...         ...             ...
+## 4598 ECK125276531        yqfH     reverse              NA
+## 4599 ECK125276532        yliM     forward         Sigma70
+## 4600 ECK125276533        ynfS     forward              NA
+## 4601 ECK125276534        ylcJ     forward              NA
+## 4602 ECK125276535        sdhX     forward         Sigma70
+```
+
+Usamos el argumento **attributes** para listar todos los nombres de columna o **atributos** que deseamos extraer.
+---
+* Selección (filtrado) de lineas
+
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"),
+            filters = list(strand = "forward"))
+```
+
+```
+## regulondb_result with 2251 rows and 4 columns
+##                id        name      strand    sigma_factor
+##       &lt;character&gt; &lt;character&gt; &lt;character&gt;     &lt;character&gt;
+## 1    ECK120000001         alr     forward              NA
+## 2    ECK120000002        modB     forward Sigma28,Sigma70
+## 3    ECK120000003        cysZ     forward              NA
+## 4    ECK120000004         dfp     forward              NA
+## 5    ECK120000007        zraS     forward         Sigma54
+## ...           ...         ...         ...             ...
+## 2247 ECK125276524        ykiD     forward              NA
+## 2248 ECK125276532        yliM     forward         Sigma70
+## 2249 ECK125276533        ynfS     forward              NA
+## 2250 ECK125276534        ylcJ     forward              NA
+## 2251 ECK125276535        sdhX     forward         Sigma70
+```
+
+Usamos **filters** para seleccionar las lineas que cumplen una condición.
+---
+* Selección (filtrado) de lineas
+
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"),
+            filters = list(sigma_factor = "Sigma54"))
+```
+
+```
+## regulondb_result with 91 rows and 4 columns
+##               id        name      strand sigma_factor
+##      &lt;character&gt; &lt;character&gt; &lt;character&gt;  &lt;character&gt;
+## 1   ECK120000007        zraS     forward      Sigma54
+## 2   ECK120000068        argT     reverse      Sigma54
+## 3   ECK120000086        aslB     forward      Sigma54
+## 4   ECK120000279        fdhF     reverse      Sigma54
+## 5   ECK120000295        fhlA     forward      Sigma54
+## ...          ...         ...         ...          ...
+## 87  ECK120004049        xdhB     forward      Sigma54
+## 88  ECK120004050        xdhC     forward      Sigma54
+## 89  ECK120004060        ygfK     forward      Sigma54
+## 90  ECK120004292        rtcA     reverse      Sigma54
+## 91  ECK120004293        rtcB     reverse      Sigma54
+```
+
+---
+* Selección (filtrado) de lineas
+
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"),
+            filters = list(sigma_factor = "Sigma54",
+                           strand = "forward"))
+```
+
+```
+## regulondb_result with 66 rows and 4 columns
+##               id        name      strand sigma_factor
+##      &lt;character&gt; &lt;character&gt; &lt;character&gt;  &lt;character&gt;
+## 1   ECK120000007        zraS     forward      Sigma54
+## 2   ECK120000086        aslB     forward      Sigma54
+## 3   ECK120000295        fhlA     forward      Sigma54
+## 4   ECK120000475        zraR     forward      Sigma54
+## 5   ECK120000476        hypA     forward      Sigma54
+## ...          ...         ...         ...          ...
+## 62  ECK120003978        norV     forward      Sigma54
+## 63  ECK120004048        xdhA     forward      Sigma54
+## 64  ECK120004049        xdhB     forward      Sigma54
+## 65  ECK120004050        xdhC     forward      Sigma54
+## 66  ECK120004060        ygfK     forward      Sigma54
+```
+
+En **filters** usamos el formato de lista o **list** para enumerar todos los filtros que deseamos aplicar.
+
+---
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"),
+            filters = list(name = "araC"))
+```
+
+```
+## regulondb_result with 1 row and 4 columns
+##             id        name      strand sigma_factor
+##    &lt;character&gt; &lt;character&gt; &lt;character&gt;  &lt;character&gt;
+## 1 ECK120000050        araC     forward      Sigma70
+```
+
+--
+Usamos **partialmatch** para buscar celdas que contienen un patrón de caracteres.
+
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"),
+            filters = list(name = "ara"),
+            partialmatch = "name")
+```
+
+```
+## regulondb_result with 13 rows and 4 columns
+##               id        name      strand sigma_factor
+##      &lt;character&gt; &lt;character&gt; &lt;character&gt;  &lt;character&gt;
+## 1   ECK120000048        araA     reverse      Sigma70
+## 2   ECK120000049        araB     reverse      Sigma70
+## 3   ECK120000050        araC     forward      Sigma70
+## 4   ECK120000051        araD     reverse      Sigma70
+## 5   ECK120000052        araE     reverse      Sigma70
+## ...          ...         ...         ...          ...
+## 9   ECK120000056        araJ     reverse      Sigma70
+## 10  ECK120000130        carA     forward      Sigma70
+## 11  ECK120001335        barA     forward           NA
+## 12  ECK120001398        marA     forward      Sigma70
+## 13  ECK120002355        rarA     forward      Sigma70
+```
+---
+
+Debemos especificar en cuál filtro se encuentra el patrón a buscar.
+
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "sigma_factor"),
+            filters = list(name = "ara",
+                           strand = "forward"),
+            partialmatch = "name")
+```
+
+```
+## regulondb_result with 5 rows and 4 columns
+##             id        name      strand sigma_factor
+##    &lt;character&gt; &lt;character&gt; &lt;character&gt;  &lt;character&gt;
+## 1 ECK120000050        araC     forward      Sigma70
+## 2 ECK120000130        carA     forward      Sigma70
+## 3 ECK120001335        barA     forward           NA
+## 4 ECK120001398        marA     forward      Sigma70
+## 5 ECK120002355        rarA     forward      Sigma70
+```
+
+&lt;br&gt;
+Nota: Estos patrones NO consideran/permiten expresiones regulares.
+
+---
+class: chapter-slide
+# Posición genómica de los elementos de regulación
+
+---
+# Genes dentro de un intervalo genómico
+
+Podemos obtener los genes dentro de un **intervalo** de posiciones genómicas usando el argumento **interval**.
+
+
+```r
+get_dataset(e_coli_regulondb, "GENE",
+            attributes = c("id", "name", "strand", "posright", "posleft"),
+            filters = list(strand = "forward",
+                           posright = c("10000", "30000")),
+            interval = "posright")
+```
+
+```
+## regulondb_result with 15 rows and 5 columns
+##               id        name      strand  posright   posleft
+##      &lt;character&gt; &lt;character&gt; &lt;character&gt; &lt;integer&gt; &lt;integer&gt;
+## 1   ECK120000200        dapB     forward     29195     28374
+## 2   ECK120000234        dnaJ     forward     15298     14168
+## 3   ECK120000235        dnaK     forward     14079     12163
+## 4   ECK120000485        ileS     forward     25207     22391
+## 5   ECK120000541        lspA     forward     25701     25207
+## ...          ...         ...         ...       ...       ...
+## 11  ECK120001070        rihC     forward     28207     27293
+## 12  ECK120001465        mbiA     forward     11315     10830
+## 13  ECK120002653        sokC     forward     17006     16952
+## 14  ECK120002703      insL-1     forward     16557     15445
+## 15  ECK120002707        yaaY     forward     21399     21181
+```
+
+---
+# Obtención de todos los elementos de regulación dentro de un intervalo.
+
+* Por defecto nos muestra sólo los genes presentes en el intervalo
+
+```r
+get_dna_objects(e_coli_regulondb,
+                grange = GRanges("chr", IRanges(1, 5000)))
+```
+
+```
+## GRanges object with 3 ranges and 4 metadata columns:
+##       seqnames    ranges strand |           id        type        name
+##          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |  &lt;character&gt; &lt;character&gt; &lt;character&gt;
+##   [1]   E.coli  337-2799      + | ECK120000987        gene        thrA
+##   [2]   E.coli 2801-3733      + | ECK120000988        gene        thrB
+##   [3]   E.coli   190-255      + | ECK120001251        gene        thrL
+##                  description
+##                  &lt;character&gt;
+##   [1] fused aspartate kina..
+##   [2]      homoserine kinase
+##   [3] &lt;i&gt;thr&lt;/i&gt; operon le..
+##   -------
+##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+```
+---
+* Podemos elegir entre "-10 promoter box", "-35 promoter box", "gene", "promoter", "Regulatory Interaction", "sRNA interaction", or "terminator".
+
+
+```r
+get_dna_objects(e_coli_regulondb,
+                grange = GRanges("chr", IRanges(200, 3000)),
+                elements = c("gene", "promoter") )
+```
+
+```
+## GRanges object with 11 ranges and 4 metadata columns:
+##        seqnames    ranges strand |           id        type                   name
+##           &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |  &lt;character&gt; &lt;character&gt;            &lt;character&gt;
+##    [1]   E.coli  337-2799      + | ECK120000987        gene                   thrA
+##    [2]   E.coli   190-255      + | ECK120001251        gene                   thrL
+##    [3]   E.coli       683      + | ECK125230825    promoter TSS_3 (cluster) prom..
+##    [4]   E.coli       688      + | ECK125230826    promoter TSS_4 promoter with ..
+##    [5]   E.coli       703      + | ECK125230827    promoter TSS_5 promoter with ..
+##    [6]   E.coli      1009      + | ECK125230828    promoter TSS_6 promoter with ..
+##    [7]   E.coli      1176      - | ECK125230829    promoter TSS_7 promoter with ..
+##    [8]   E.coli      1886      + | ECK125230830    promoter TSS_8 promoter with ..
+##    [9]   E.coli      1965      + | ECK125230831    promoter TSS_9 promoter with ..
+##   [10]   E.coli      2581      + | ECK125230832    promoter TSS_10 promoter with..
+##   [11]   E.coli      2811      + | ECK125230833    promoter TSS_11 promoter with..
+##                   description
+##                   &lt;character&gt;
+##    [1] fused aspartate kina..
+##    [2] &lt;i&gt;thr&lt;/i&gt; operon le..
+##    [3] TSS_3 (cluster) prom..
+##    [4] TSS_4 promoter with ..
+##    [5] TSS_5 promoter with ..
+##    [6] TSS_6 promoter with ..
+##    [7] TSS_7 promoter with ..
+##    [8] TSS_8 promoter with ..
+##    [9] TSS_9 promoter with ..
+##   [10] TSS_10 promoter with..
+##   [11] TSS_11 promoter with..
+##   -------
+##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+```
+
+---
+# Podemos graficar los elementos de regulación, con su posición genómica.
+
+
+
+
+```r
+plot_dna_objects(e_coli_regulondb,
+                 grange = GRanges("chr", IRanges(200, 3000)),
+                 elements = c("gene", "promoter") )
+```
+
+&lt;img src="regutools_files/figure-html/unnamed-chunk-37-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: chapter-slide
+# Redes de regulación transcripcional
+
+---
+# ¿Cuáles son los reguladores de cierto gen?
+
+### Por defecto el resultado se ve como una tabla.
+
+```r
+get_gene_regulators( e_coli_regulondb,
+                     genes = c("araC"),
+                     output.type = "TF" )
+```
+
+```
+## regulondb_result with 3 rows and 3 columns
+##         genes  regulators      effect
+##   &lt;character&gt; &lt;character&gt; &lt;character&gt;
+## 1        araC         CRP           +
+## 2        araC        AraC         +/-
+## 3        araC        XylR           -
+```
+---
+# ¿Cuáles son los reguladores de cierto gen?
+
+### Podemos obtener resultados en una sola línea.
+
+```r
+get_gene_regulators( e_coli_regulondb,
+                     genes = c("araC"),
+                     output.type = "TF",
+                     format = "onerow" )
+```
+
+
+```
+## # A tibble: 1 x 2
+##   genes regulators                
+##   &lt;chr&gt; &lt;chr&gt;                     
+## 1 araC  CRP(+), AraC(+/-), XylR(-)
+```
+
+---
+# ¿Cuáles son los genes regulados por cada factor transcripcional?
+
+### Puede ser una relación TF-GENE
+
+```r
+get_regulatory_network(e_coli_regulondb,
+                       regulator = "AraC",
+                       type = "TF-GENE")
+```
+
+```
+## regulondb_result with 14 rows and 3 columns
+##       regulator   regulated      effect
+##     &lt;character&gt; &lt;character&gt; &lt;character&gt;
+## 1          AraC        araA         +/-
+## 2          AraC        araB         +/-
+## 3          AraC        araC         +/-
+## 4          AraC        araD         +/-
+## 5          AraC        araE           +
+## ...         ...         ...         ...
+## 10         AraC        xylA           -
+## 11         AraC        xylB           -
+## 12         AraC        ygeA           +
+## 13         AraC        ydeM           -
+## 14         AraC        ydeN           -
+```
+
+---
+### Relación TF-TF
+
+```r
+get_regulatory_network(e_coli_regulondb,
+                       regulator = "AraC",
+                       type = "TF-TF")
+```
+
+```
+## regulondb_result with 1 row and 3 columns
+##     regulator   regulated      effect
+##   &lt;character&gt; &lt;character&gt; &lt;character&gt;
+## 1        AraC        AraC         +/-
+```
+---
+### Relación GENE-GENE
+
+
+```r
+get_regulatory_network(e_coli_regulondb,
+                       regulator = "cpxR",
+                       type = "GENE-GENE")
+```
+
+```
+## regulondb_result with 71 rows and 3 columns
+##       regulator   regulated      effect
+##     &lt;character&gt; &lt;character&gt; &lt;character&gt;
+## 1          cpxR        acrD           +
+## 2          cpxR        cpxR           +
+## 3          cpxR        aroG           +
+## 4          cpxR        cheA           -
+## 5          cpxR        cheA           -
+## ...         ...         ...         ...
+## 67         cpxR        mzrA           +
+## 68         cpxR        cpxP           +
+## 69         cpxR        mscM           -
+## 70         cpxR        cpxQ           +
+## 71         cpxR        rseD           -
+```
+
+---
+# Podemos visualizar estas redes de regulación con Cytoscape
+&lt;br&gt;
+.pull-left[&lt;br&gt;&lt;br&gt;
+
+```r
+get_regulatory_network(
+  e_coli_regulondb,
+  regulator = "AraC",
+  type = "TF-GENE",
+  cytograph = TRUE)
+```
+]
+
+.pull-right[
+&lt;img src="img//network.png" width="110%" /&gt;
+]
+---
+# Obtención de los sitios de unión de factores transcripcionales
+
+
+```r
+get_binding_sites(e_coli_regulondb, transcription_factor = "AraC")
+```
+
+```
+## GRanges object with 15 ranges and 1 metadata column:
+##                          seqnames          ranges strand |               sequence
+##                             &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |            &lt;character&gt;
+##   ECK120015742-araB-araC      chr     70110-70126      + | ataaaaagcgTCAGGTAGGA..
+##   ECK120012328-araB-araC      chr     70131-70147      + | ccgctaatctTATGGATAAA..
+##   ECK120012320-araB-araC      chr     70184-70200      - | tctataatcaCGGCAGAAAA..
+##   ECK120012323-araB-araC      chr     70205-70221      - | caaaaacgcgTAACAAAAGT..
+##   ECK120012603-araB-araC      chr     70342-70358      - | attcagagaaGAAACCAATT..
+##                      ...      ...             ...    ... .                    ...
+##        ECK120012333-araF      chr 1986396-1986412      - | ccaaagacaaCAAGGATTTC..
+##        ECK120012915-araE      chr 2982244-2982260      - | tccatatttaTGCTGTTTCC..
+##        ECK120012913-araE      chr 2982265-2982281      - | cgacatgtcgCAGCAATTTA..
+##        ECK125108641-xylA      chr 3730824-3730840      - | taacataattGAGCAACTGA..
+##        ECK125108643-xylA      chr 3730847-3730863      - | attatctcaaTAGCAGTGTG..
+##   -------
+##   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+```
+
+---
+class: chapter-slide
+
+# Actualizaciones
+
+---
+# Consideraciones sobre las versiones de regulonDB y regutools
+&lt;br&gt;
+- Bioconductor y regutools se actualizan cada 6 meses. Obtén la última versión usando:
+
+```r
+# Para actualizar todos los paquetes de Bioconductor
+BiocManager::install() 
+# Para actualizar solamente regutools
+BiocManager::install("regutools")
+```
+- Cada versión de regutools descarga la última versión disponible de regulonDB al momento de la actualización.
+- Si surge una nueva versión en los meses intermedios, puede no verse reflejada inmediatamente.
+- Puedes contactarnos en el sitio de BugReports &lt;https://support.bioconductor.org/t/regutools/&gt; o mediante los Issues de GitHub en &lt;https://github.com/ComunidadBioInfo/regutools&gt;
+
+
+---
+class: center
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+&lt;img src="img/gracias.png" width="80%" /&gt;
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+.right[Ilustración de Allison Hill]
+---
+class: center, middle
+
+# Diapositivas hechas con el paquete [xaringan](https://github.com/yihui/xaringan) de Yihui Xie y el theme [cand](https://github.com/josschavezf/seminario-regutools) de Joselyn Chávez
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
