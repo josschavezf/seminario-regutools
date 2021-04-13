@@ -350,7 +350,7 @@ get_dna_objects(e_coli_regulondb,
 ```
 
 ---
-# Podemos graficar los elementos de regulación, con su posición genómica.
+# Podemos graficar los elementos de regulación con su posición genómica.
 
 ```{r,echo=FALSE}
 e_coli_regulondb <-
@@ -384,7 +384,7 @@ get_gene_regulators( e_coli_regulondb,
 ---
 # ¿Cuáles son los reguladores de cierto gen?
 
-### Podemos obtener resultados en una sola línea.
+### Podemos obtener los resultados en una sola línea.
 ```{r,eval=FALSE}
 get_gene_regulators( e_coli_regulondb,
                      genes = c("araC"),
