@@ -17,7 +17,7 @@ class: center, middle, inverse, title-slide
 
 # Consultando la base de datos regulonDB con el paquete regutools
 ### Joselyn Chávez
-### 13/04/2021
+### 27/04/2021
 
 ---
 
@@ -54,12 +54,102 @@ class: chapter-slide
 # Instalación
 
 ---
+# Existen varias formas de instalar paquetes en R
 
+.center[
+## Desde CRAN ]
+
+.pull-left[
+.center[&lt;https://cran.r-project.org&gt;]&lt;br&gt;
+
+&lt;img src="img/cran.png" width="100%" /&gt;
+]
+
+.pull-right[&lt;br&gt;&lt;br&gt;
+Usamos la función
+
+```r
+install.packages()
+```
+
+Por ejemplo:
+
+```r
+install.packages("ggplot2")
+```
+]
+---
+# Existen varias formas de instalar paquetes en R
+
+.center[
+## Desde Bioconductor ]
+
+.pull-left[
+.center[&lt;https://bioconductor.org&gt;]&lt;br&gt;
+
+&lt;img src="img/bioconductor.png" width="100%" /&gt;
+]
+
+.pull-right[
+Necesitamos del paquete **BiocManager** que nos ayuda a conectar con Bioconductor.
+
+
+```r
+install.packages("BiocManager")
+```
+
+Usamos la función install.
+
+```r
+BiocManager::install()
+```
+
+Por ejemplo:
+
+```r
+BiocManager::install("BioStrings")
+```
+]
+
+---
+# Existen varias formas de instalar paquetes en R
+
+.center[
+## Desde GitHub ]
+
+.pull-left[
+.center[&lt;https://github.com/josschavezf/erba&gt;]&lt;br&gt;
+&lt;img src="img/erba1.png" width="80%" style="display: block; margin: auto;" /&gt;&lt;img src="img/erba2.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+Necesitamos el paquete **devtools** para conectar con GitHub.
+
+
+```r
+install.packages("devtools")
+```
+
+Usando la función
+
+```r
+devtools::install_github()
+```
+
+Por ejemplo:
+
+```r
+install_github("josschavezf/erba")
+```
+
+]
+
+---
 # Instalando regutools
 .pull-left[ &lt;br&gt;&lt;br&gt;
 .center[&lt;https://bioconductor.org/&gt; ]
 
-&lt;img src="img/bioconductor.png" width="100%" /&gt;
+&lt;img src="img/bioconductor_regutools.png" width="100%" /&gt;
 ]
 
 .pull-right[ &lt;br&gt;
@@ -122,9 +212,10 @@ regulondb_conn &lt;- connect_database()
 Si le indicamos una ruta de descarga, sólo necesitaremos descargar la base una vez.
 
 
+
+
 ```r
-regulondb_conn &lt;- 
-  connect_database(bfc = BiocFileCache::BiocFileCache("base"))
+regulondb_conn &lt;- connect_database(bfc = BiocFileCache("base"))
 ```
 
 ---
@@ -665,7 +756,7 @@ plot_dna_objects(e_coli_regulondb,
                  elements = c("gene", "promoter") )
 ```
 
-&lt;img src="regutools_files/figure-html/unnamed-chunk-37-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="regutools_files/figure-html/unnamed-chunk-49-1.png" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: chapter-slide

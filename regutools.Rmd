@@ -1,7 +1,7 @@
 ---
 title: "Consultando la base de datos regulonDB con el paquete regutools"
 author: "Joselyn Chávez"
-date: "13/04/2021"
+date: "27/04/2021"
 output:
   xaringan::moon_reader:
     css: ["css/cand.css"]
@@ -50,13 +50,102 @@ class: chapter-slide
 # Instalación
 
 ---
+# Existen varias formas de instalar paquetes en R
 
+.center[
+## Desde CRAN ]
+
+.pull-left[
+.center[<https://cran.r-project.org>]<br>
+
+```{r,echo=FALSE,out.width='100%'}
+include_graphics("img/cran.png")
+```
+]
+
+.pull-right[<br><br>
+Usamos la función
+```{r, eval=FALSE}
+install.packages()
+```
+
+Por ejemplo:
+```{r, eval=FALSE}
+install.packages("ggplot2")
+```
+]
+---
+# Existen varias formas de instalar paquetes en R
+
+.center[
+## Desde Bioconductor ]
+
+.pull-left[
+.center[<https://bioconductor.org>]<br>
+
+```{r,echo=FALSE,out.width='100%'}
+include_graphics("img/bioconductor.png")
+```
+]
+
+.pull-right[
+Necesitamos del paquete **BiocManager** que nos ayuda a conectar con Bioconductor.
+
+```{r, eval=FALSE}
+install.packages("BiocManager")
+```
+
+Usamos la función install.
+```{r, eval=FALSE}
+BiocManager::install()
+```
+
+Por ejemplo:
+```{r, eval=FALSE}
+BiocManager::install("BioStrings")
+```
+]
+
+---
+# Existen varias formas de instalar paquetes en R
+
+.center[
+## Desde GitHub ]
+
+.pull-left[
+.center[<https://github.com/josschavezf/erba>]<br>
+```{r,echo=FALSE,out.width='80%',fig.align='center'}
+include_graphics("img/erba1.png")
+include_graphics("img/erba2.png")
+```
+]
+
+.pull-right[
+Necesitamos el paquete **devtools** para conectar con GitHub.
+
+```{r,eval=FALSE}
+install.packages("devtools")
+```
+
+Usando la función
+```{r,eval=FALSE}
+devtools::install_github()
+```
+
+Por ejemplo:
+```{r,eval=FALSE}
+install_github("josschavezf/erba")
+```
+
+]
+
+---
 # Instalando regutools
 .pull-left[ <br><br>
 .center[<https://bioconductor.org/> ]
 
 ```{r,echo=FALSE,out.width='100%'}
-include_graphics("img/bioconductor.png")
+include_graphics("img/bioconductor_regutools.png")
 ```
 ]
 
@@ -117,9 +206,12 @@ regulondb_conn <- connect_database()
 
 Si le indicamos una ruta de descarga, sólo necesitaremos descargar la base una vez.
 
+```{r,echo=FALSE, warning=FALSE,message=FALSE}
+library(BiocFileCache)
+```
+
 ```{r,message=FALSE}
-regulondb_conn <- 
-  connect_database(bfc = BiocFileCache::BiocFileCache("base"))
+regulondb_conn <- connect_database(bfc = BiocFileCache("base"))
 ```
 
 ---
